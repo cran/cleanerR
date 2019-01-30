@@ -1,0 +1,156 @@
+---
+title: "cleanerR package"
+author: "Rafael Silva Pereira"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+## The cleanerR Package
+
+Often we are faced with data that has missing values,it is often discussed how to handle this missing data, if we can ignore the rows they appear or if we must find a way to correctly fill the data.
+
+
+
+When talking about databases we can define a functional dependency that tells the following:
+
+
+
+Given a set of attributes ${P_1,P_2...,P_n}$ if one can determine a attribute $P_k$ value with full certainty by knowing $P_{j_i}$ attribute values then we can say the set $P_{j_i}$ is a functional dependency to $P_k$
+
+
+
+We could then define a almost functional dependency by saying that while a set $P_{j_i}$ can not fully determine $P_k$ it can determine a percentage $\alpha$ of it and give a probability distribution for $1-\alpha$ of these values.
+
+
+
+This package then has the purpose to implement this concept, in which it takes a dataframe, the goal collumn you wish to fill missing data and fills the data with a accuracy given the collumns you choose to use for the almost functional dependency calculation, the following functions can be used as well as examples of how to use them: 
+
+
+## Functions and Examples
+
+generate_candidates
+
+
+
+This function takes as a input the dataframe, the goal collumn,The maximum lenght of the set $P_{j_i}$ you wish to test(the bigger the longer this calculation will take), a measure of error(the higher the number the higher error you accept), and a trigger variable, the last one works as following:
+
+
+
+- trigger=1 rejects all possible sets that consider a tuple of lenght of the set $P_{j_i}$ that only appears once on the dataset
+
+
+
+- trigger=0 accepts all sets that satisfy the error measure
+
+
+
+trigger=1 usually works better when the ratio of $\frac{length(unique(a))}{length(a)}$ is smaller.
+
+
+
+Consider the following example of how to use it
+```{r example1}
+require(cleanerR)
+z=generate_candidates(df=iris,goal=5,maxi=3,repetitions=100,trigger=0)
+print(z[[1]])
+cat("error rate\n")
+print(z[[2]])
+```
+Then z is a list of lists where z[[1]] are the candidates and z[[2]] is the error rate, lets talk about the next function
+
+
+
+best_vector:
+
+
+
+
+This function runs generate_candidates and picks the z[[1]] value that has the minimum error rate when you desire the highest possible accuracy,if that is what you desire choose this function, if there are a set of values that are more important to be right than others one can look at other results of generate_candidates
+
+
+
+
+NA_VALUES
+
+
+
+Returns how many NA values the dataframe has in each collumn
+
+
+
+It is used by giving the function the dataframe
+
+
+
+Complete_dataset
+
+
+
+This is the main function of the package, it takes as a input the dataframe, the set of attributes you wish to use as the approximate functional dependency and the attribute you wish to fill
+
+
+
+If what you want is highest accuracy possible i would suggest you run the following in sequence
+
+
+
+a=best_vector(df=df,goal=missing,....)
+
+
+
+new_df=Complete_dataset(df=df,rows=a,goal=missing)
+
+
+
+Then new_df is equal to df but the goal collumn has no missing values or very close to none in special cases where all ocurrences of a certain value disappeared in the original dataset so the system wont try to guess in this case
+
+
+
+Of course if you want to complete your dataset you want to know what is the actual accuracy you are getting to fill this data to know if you can trust on the information you get on the new dataframe, to do so i give you the following functions:
+
+
+
+MeanAccuracy:
+
+
+
+This function consider the hypothesis that the data you have is representative of the missing values, then it computes the expected accuracy you get (a number between 0 and 1) when filling the data by this hypothesis, to run it you use:
+
+
+
+MeanAccuracy(df=df,VECTORS=a,goal=missing)
+
+
+
+Where a is the set of attributes you are using to predict missing.
+
+
+
+BestAccuracy
+
+
+
+This function works like the above but the hypothesis is all missing values are related to the attribute you have the highest confidence when predicting, the way to use is the same.
+
+
+
+WorstAccuracy:
+
+
+
+This function works like the above but the hypothesis is all missing values are related to the attribute you have the lowest confidence when predicting, the way to use is the same.
+
+
+   
