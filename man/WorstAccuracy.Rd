@@ -16,8 +16,6 @@ WorstAccuracy(df, VECTORS, goal)
 \description{
 \code{WorstAccuracy} Asks for a dataframe, a vector of collumn indices and the goal collumn and returns the minimum possible value of accuracy of filling missing values
 }
-
-
 \examples{
 #The Worst accuracy function tells its user the worst case accuracy possiblle.
 #Code with two ## is working code but takes longer than 5 seconds
@@ -45,5 +43,4 @@ print(WorstAccuracy(iris,1:2,5))
 ##print(WorstAccuracy(mtcars,c(1,3,5),c(10,11)))
 #In this case we want to use mpg,disp,drat to predict a pair gear,carb
 #To check the confidence of predicted values the user should use all three accuracy functions
-
 }

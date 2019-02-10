@@ -12,7 +12,7 @@
 
 <meta name="author" content="Rafael Silva Pereira" />
 
-<meta name="date" content="2019-01-21" />
+<meta name="date" content="2019-02-04" />
 
 <title>cleanerR package</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">cleanerR package</h1>
 <h4 class="author"><em>Rafael Silva Pereira</em></h4>
-<h4 class="date"><em>2019-01-21</em></h4>
+<h4 class="date"><em>2019-02-04</em></h4>
 
 
 
@@ -81,80 +81,90 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>Given a set of attributes <span class="math inline">\({P_1,P_2...,P_n}\)</span> if one can determine a attribute <span class="math inline">\(P_k\)</span> value with full certainty by knowing <span class="math inline">\(P_{j_i}\)</span> attribute values then we can say the set <span class="math inline">\(P_{j_i}\)</span> is a functional dependency to <span class="math inline">\(P_k\)</span></p>
 <p>We could then define a almost functional dependency by saying that while a set <span class="math inline">\(P_{j_i}\)</span> can not fully determine <span class="math inline">\(P_k\)</span> it can determine a percentage <span class="math inline">\(\alpha\)</span> of it and give a probability distribution for <span class="math inline">\(1-\alpha\)</span> of these values.</p>
 <p>This package then has the purpose to implement this concept, in which it takes a dataframe, the goal collumn you wish to fill missing data and fills the data with a accuracy given the collumns you choose to use for the almost functional dependency calculation, the following functions can be used as well as examples of how to use them:</p>
-</div>
-<div id="functions-and-examples" class="section level2">
-<h2>Functions and Examples</h2>
-<p>generate_candidates</p>
+<p>Observation: Every function presented has a implementation that can receive a data.table instead of a dataframe. The user does not have to worry to learn its syntax since the system itself wil check if the object is a data table or data frame Then call the corresponding function.</p>
+<p>data.tables are recommended when your dataset starts to grow large. ## Functions and Examples</p>
+<p>GenerateCandidates</p>
 <p>This function takes as a input the dataframe, the goal collumn,The maximum lenght of the set <span class="math inline">\(P_{j_i}\)</span> you wish to test(the bigger the longer this calculation will take), a measure of error(the higher the number the higher error you accept), and a trigger variable, the last one works as following:</p>
-<ul>
-<li><p>trigger=1 rejects all possible sets that consider a tuple of lenght of the set <span class="math inline">\(P_{j_i}\)</span> that only appears once on the dataset</p></li>
-<li><p>trigger=0 accepts all sets that satisfy the error measure</p></li>
-</ul>
+<p>When you pair all pair of tuples {set,goal} where set is the set of vectors to predict goal some elements may only show once in your dataset, the trigger variable considers that the ratio of these tuples to all possible tuples is defined by <span class="math inline">\(R_t\)</span></p>
+<p>If <span class="math inline">\(1-R_t\)</span> is bigger than the trigger variable we shall reject this set to predict goal as a possible candidate</p>
 <p>trigger=1 usually works better when the ratio of <span class="math inline">\(\frac{length(unique(a))}{length(a)}\)</span> is smaller.</p>
+<p>As trigger draws closer to 0 the best solution may draw closer to a primary key of the dataset</p>
 <p>Consider the following example of how to use it</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">require</span>(cleanerR)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">require</span>(plyr)
+<span class="co">#&gt; Loading required package: plyr</span>
+<span class="kw">require</span>(cleanerR)
 <span class="co">#&gt; Loading required package: cleanerR</span>
-z=<span class="kw">generate_candidates</span>(<span class="dt">df=</span>iris,<span class="dt">goal=</span><span class="dv">5</span>,<span class="dt">maxi=</span><span class="dv">3</span>,<span class="dt">repetitions=</span><span class="dv">100</span>,<span class="dt">trigger=</span><span class="dv">0</span>)
+z=<span class="kw">GenerateCandidates</span>(<span class="dt">df=</span>iris,<span class="dt">goal=</span><span class="dv">5</span>,<span class="dt">maxi=</span><span class="dv">3</span>,<span class="dt">repetitions=</span><span class="dv">100</span>,<span class="dt">trigger=</span><span class="fl">0.0</span>)
 <span class="co">#&gt; [1] 1</span>
 <span class="co">#&gt; [1] 2</span>
 <span class="co">#&gt; [1] 3</span>
 <span class="kw">print</span>(z[[<span class="dv">1</span>]])
 <span class="co">#&gt; [[1]]</span>
-<span class="co">#&gt; [1] 1</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; [[2]]</span>
-<span class="co">#&gt; [1] 2</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; [[3]]</span>
-<span class="co">#&gt; [1] 3</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; [[4]]</span>
-<span class="co">#&gt; [1] 4</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; [[5]]</span>
-<span class="co">#&gt; [1] 1 2</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; [[6]]</span>
-<span class="co">#&gt; [1] 1 3</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; [[7]]</span>
-<span class="co">#&gt; [1] 1 4</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; [[8]]</span>
-<span class="co">#&gt; [1] 2 3</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; [[9]]</span>
-<span class="co">#&gt; [1] 2 4</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; [[10]]</span>
-<span class="co">#&gt; [1] 3 4</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; [[11]]</span>
 <span class="co">#&gt; [1] 1 2 3</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; [[12]]</span>
+<span class="co">#&gt; [[2]]</span>
 <span class="co">#&gt; [1] 1 2 4</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; [[13]]</span>
+<span class="co">#&gt; [[3]]</span>
 <span class="co">#&gt; [1] 1 3 4</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; [[14]]</span>
+<span class="co">#&gt; [[4]]</span>
 <span class="co">#&gt; [1] 2 3 4</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; [[5]]</span>
+<span class="co">#&gt; [1] 1 3</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; [[6]]</span>
+<span class="co">#&gt; [1] 3 4</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; [[7]]</span>
+<span class="co">#&gt; [1] 2 3</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; [[8]]</span>
+<span class="co">#&gt; [1] 2 4</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; [[9]]</span>
+<span class="co">#&gt; [1] 1 4</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; [[10]]</span>
+<span class="co">#&gt; [1] 3</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; [[11]]</span>
+<span class="co">#&gt; [1] 4</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; [[12]]</span>
+<span class="co">#&gt; [1] 1 2</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; [[13]]</span>
+<span class="co">#&gt; [1] 2</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; [[14]]</span>
+<span class="co">#&gt; [1] 1</span>
 <span class="kw">cat</span>(<span class="st">&quot;error rate</span><span class="ch">\n</span><span class="st">&quot;</span>)
 <span class="co">#&gt; error rate</span>
 <span class="kw">print</span>(z[[<span class="dv">2</span>]])
-<span class="co">#&gt;  [1] 22 20  5  5 10  1  4  2  3  1  0  0  0  0</span></code></pre></div>
-<p>Then z is a list of lists where z[[1]] are the candidates and z[[2]] is the error rate, lets talk about the next function</p>
-<p>best_vector:</p>
+<span class="co">#&gt;  [1]  0  0  0  0  1  1  2  3  4  5  5 10 20 22</span></code></pre></div>
+<p>Then z is a list of lists where z[[1]] are the candidates and z[[2]] is the error rate,you could call z[[1]] by z<span class="math inline">\(sets and z[[2]] by z\)</span>error, notice how z is ordered, lets talk about the next function</p>
+<p>BestVector:</p>
 <p>This function runs generate_candidates and picks the z[[1]] value that has the minimum error rate when you desire the highest possible accuracy,if that is what you desire choose this function, if there are a set of values that are more important to be right than others one can look at other results of generate_candidates</p>
+<p>The function can be run as:</p>
+<p>BestVector(df=iris,goal=5,maxi=3,repetitions=nrow(iris),trigger=0.8,ratio=0.99)</p>
+<p>The attributes are as following</p>
+<p>df: dataframe or data.table to use. goal: goal collumn to predict maxi: max number of combinations of sets that will be tested repetitions: Number of alternate possible values, the higher the higher error trigger: In a combination a percentage of tuples would appear only once on the dataset, if a set has 1-p where p is this percentage, then this set is rejected, trigger=0 would allow a trivial solution which is the best set is a primary key. ratio: If a collumn has <span class="math inline">\(f=\frac{U(x)}{x}\)</span> where x is the length all its values and <span class="math inline">\(U(x)\)</span> is the length of its unique values where <span class="math inline">\(f&gt;ratio\)</span> then this set is rejected, <span class="math inline">\(ratio=1\)</span> accepts primary keys of the dataset</p>
 <p>NA_VALUES</p>
 <p>Returns how many NA values the dataframe has in each collumn</p>
 <p>It is used by giving the function the dataframe</p>
-<p>Complete_dataset</p>
+<p>For example</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">require</span>(plyr)
+<span class="kw">require</span>(cleanerR)
+<span class="kw">NA_VALUES</span>(iris)
+<span class="co">#&gt; Sepal.Length  Sepal.Width Petal.Length  Petal.Width      Species </span>
+<span class="co">#&gt;            0            0            0            0            0</span></code></pre></div>
+<p>CompleteDataset</p>
 <p>This is the main function of the package, it takes as a input the dataframe, the set of attributes you wish to use as the approximate functional dependency and the attribute you wish to fill</p>
 <p>If what you want is highest accuracy possible i would suggest you run the following in sequence</p>
-<p>a=best_vector(df=df,goal=missing,….)</p>
-<p>new_df=Complete_dataset(df=df,rows=a,goal=missing)</p>
+<p>a=BestVector(df=df,goal=missing,….)</p>
+<p>new_df=CompleteDataset(df=df,rows=a,goal=missing)</p>
 <p>Then new_df is equal to df but the goal collumn has no missing values or very close to none in special cases where all ocurrences of a certain value disappeared in the original dataset so the system wont try to guess in this case</p>
 <p>Of course if you want to complete your dataset you want to know what is the actual accuracy you are getting to fill this data to know if you can trust on the information you get on the new dataframe, to do so i give you the following functions:</p>
 <p>MeanAccuracy:</p>

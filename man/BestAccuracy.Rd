@@ -16,7 +16,6 @@ BestAccuracy(df, VECTORS, goal)
 \description{
 \code{BestAccuracy} Asks for a dataframe, a vector of collumn indices and the goal collumn and returns the maximum possible value of accuracy of filling missing values
 }
-
 \examples{
 #The Best accuracy function tells its user the best accuracy possible.
 #Code with two ## is working code but takes longer than 5 seconds
@@ -44,5 +43,4 @@ print(BestAccuracy(iris,1:2,5))
 ##print(BestAccuracy(mtcars,c(1,3,5),c(10,11)))
 #In this case we want to use mpg,disp,drat to predict a pair gear,carb
 #To check the confidence of predicted values the user should use all three accuracy functions
-
 }
